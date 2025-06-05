@@ -3,10 +3,17 @@ name = "manim-prerecorded"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.11"
 dependencies = [
+    "fuzzywuzzy[speedup]>=0.18.0",
+    "gtts>=2.5.4",
+    "librosa>=0.11.0",
     "manim-voiceover[azure,gtts,recorder]>=0.3.7",
+    "pygame>=2.6.1",
     "requests>=2.32.3",
+    "setuptools>=80.9.0",
+    "soundfile>=0.13.1",
+    "whisper>=1.1.10",
 ]
 
 [dependency-groups]
