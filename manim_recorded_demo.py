@@ -4,16 +4,18 @@ from manim import (
     UP, DOWN, RIGHT,
     BLUE, RED, GREEN, YELLOW, WHITE, GRAY, ORANGE, PURPLE
 )
+import warnings
 from manim_voiceover import VoiceoverScene
 from pathlib import Path
 import tempfile
 import os
 
 import librosa
-from manim_prerecorded.services import RecordedService
+from src.manim_voiceover_recorded import RecordedService
 
 # Import for generating test audio
 from gtts import gTTS
+warnings.filterwarnings("ignore", message=".*pkg_resources is deprecated.*")
 
 
 def create_test_audio(audio_path: str):
@@ -29,14 +31,11 @@ def create_test_audio(audio_path: str):
     Thank you for watching this demonstration.
     """
     
-    try:
-        tts = gTTS(text=demo_script.strip(), lang='en', slow=False)
-        tts.save(audio_path)
-        print(f"✓ Test audio created successfully")
-        return True
-    except Exception as e:
-        print(f"❌ Failed to create test audio: {e}")
-        return False
+    tts = gTTS(text=demo_script.strip(), lang='en', slow=False)
+    tts.save(audio_path)
+    print(f"✓ Test audio created successfully")
+    return True
+
 
 
 class RecordedServiceDemo(VoiceoverScene):
@@ -53,28 +52,23 @@ class RecordedServiceDemo(VoiceoverScene):
         # Create test audio if it doesn't exist
         if not audio_file.exists():
             print("Creating demo audio file...")
-            if not create_test_audio(str(audio_file)):
+            success = create_test_audio(str(audio_file))
+            if not success:
                 self.add(Text("Failed to create audio file", color=RED))
                 return
         
-        # Initialize RecordedService
-        try:
-            print("Initializing RecordedService...")
-            recorded_service = RecordedService(
-                prerecorded_audio=str(audio_file),
-                transcription_model="base",
-                similarity_threshold=0.3,  # Lower threshold for better matching
-                cache_dir="./voiceover_cache"
-            )
-            
-            # Set the voiceover service for this scene
-            self.set_speech_service(recorded_service)
-            print("✓ RecordedService initialized")
-        except Exception as e:
-            print(f"❌ Failed to initialize RecordedService: {e}")
-            self.add(Text(f"Service Error: {str(e)}", color=RED, font_size=24))
-            return
+        print("Initializing RecordedService...")
+        recorded_service = RecordedService(
+            prerecorded_audio=str(audio_file),
+            transcription_model="base",
+            similarity_threshold=0.3,  # Lower threshold for better matching
+            cache_dir="./voiceover_cache"
+        )
         
+        # Set the voiceover service for this scene
+        self.set_speech_service(recorded_service)
+        print("✓ RecordedService initialized")
+    
         # Now create the demo with voiceovers
         self.create_demo_with_voiceover()
     
@@ -166,7 +160,7 @@ class SimpleRecordedDemo(VoiceoverScene):
     """Simpler demo version with minimal setup."""
     
     def construct(self):
-        """Simple demo that just shows basic functionality."""
+        """Simple demo that ust shows basic functionality."""
         
         # Create a very simple audio file for testing
         audio_file = Path("simple_demo.mp3")
