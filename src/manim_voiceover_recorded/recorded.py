@@ -4,6 +4,7 @@ from manim_voiceover.services.base import SpeechService
 from manim_voiceover.helper import remove_bookmarks, prompt_ask_missing_extras
 from manim import logger
 import json
+import re
 
 try:
     from fuzzywuzzy import fuzz
@@ -68,8 +69,12 @@ class RecordedService(SpeechService):
         for segment in segments:
             if hasattr(segment, 'words') and segment.words:
                 for word in segment.words:
+                    w = word.word.lower()
+                    w = w.replace('-', ' ')
+                    w = re.sub(r'[^\w\s]', '', w)
+                    w = w.strip()
                     self._word_boundaries.append({
-                        'word': word.word,
+                        'word': w,
                         'start': word.start,
                         'end': word.end
                     })
@@ -80,7 +85,10 @@ class RecordedService(SpeechService):
     def _find_best_match(self, target_text: str):
         """Find the best matching word sequence for the target text."""
         # Convert target text to word list
-        target_words = target_text.strip().split()
+        target_text = re.sub(r'-', ' ', target_text)
+        target_text = re.sub(r'[^\w\s]', '', target_text)
+        target_text = re.sub(r'\s+', ' ', target_text)
+        target_words = target_text.lower().split()
         
         # Get script words starting from last timestamp
         start_idx = 0
@@ -135,9 +143,8 @@ class RecordedService(SpeechService):
         # Sliding window approach
         for i in range(len(script) - len(phrase) + 1):
             # Try different window sizes to account for insertions/deletions
-            for window_size in range(len(phrase) - 1, min(len(phrase) + 2, len(script) - i + 1)):
+            if phrase[0] == script[i]:
                 score = self._calculate_alignment_score(phrase, script[i:i + window_size])
-                
                 if score > best_score:
                     best_score = score
                     best_start = i
