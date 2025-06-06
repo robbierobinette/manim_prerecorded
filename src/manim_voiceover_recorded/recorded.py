@@ -509,16 +509,7 @@ Please adjust the text or lower the similarity_threshold.
         json_dict = {
             "input_text": text,
             "input_data": input_data,
-            "original_audio": audio_path,
-            "word_boundaries": word_boundaries,
-            "transcribed_text": ' '.join([self.word_segments[i]['word'] for i in range(start_idx, end_idx)]),
-            "similarity_score": similarity,
-            "matched_segment": {
-                "start_time": start_time,
-                "end_time": end_time,
-                "start_word_idx": start_idx,
-                "end_word_idx": end_idx,
-            }
+            "original_audio": audio_path
         }
 
         logger.info(f"Successfully matched text (similarity: {similarity:.3f})")
